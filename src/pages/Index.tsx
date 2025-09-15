@@ -5,9 +5,11 @@ import SalonCard from "../components/ui/SalonCard";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Search } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useI18n();
 
   // Mock salon data
   const salons = [
@@ -56,17 +58,15 @@ const Index = () => {
       <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground py-16 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            Glow Up Your Look
+            {t("app_name")}
           </h1>
-          <p className="text-xl mb-8 opacity-90">
-            Book the best barbers and salons in your area
-          </p>
+          <p className="text-xl mb-8 opacity-90"></p>
           
           {/* Search Bar */}
           <div className="relative max-w-md mx-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input 
-              placeholder="Search for services or locations..."
+              placeholder={t("search_barbers")}
               className="pl-10 bg-background text-foreground"
             />
           </div>
@@ -76,7 +76,7 @@ const Index = () => {
       {/* Categories */}
       <div className="py-12 px-6">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">Choose Your Service</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">{t("choose_service")}</h2>
           <CategoryCard />
         </div>
       </div>
@@ -84,13 +84,13 @@ const Index = () => {
       {/* Featured Salons */}
       <div className="py-12 px-6 bg-muted/50">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-8">Featured Salons</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">{t("featured_salons")}</h2>
           
           {/* Search Bar */}
           <div className="relative max-w-md mx-auto mb-8">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input 
-              placeholder="Search for barbers..."
+              placeholder={t("search_barbers")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"

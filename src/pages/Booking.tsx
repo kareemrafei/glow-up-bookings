@@ -5,12 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Calendar } from "../components/ui/calendar";
 import { Badge } from "../components/ui/badge";
 import { CalendarDays, Clock } from "lucide-react";
+import { saveAppointment } from "@/lib/appointments";
+import { useI18n } from "@/lib/i18n";
 
 const Booking = () => {
   const { salonId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const serviceId = searchParams.get('service');
+  const { t } = useI18n();
   
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
@@ -29,22 +32,25 @@ const Booking = () => {
 
   const handleBooking = () => {
     if (!selectedDate || !selectedTime) {
-      alert("Please select both date and time");
+      alert(t("select_date_first"));
       return;
     }
     
-    // TODO: Save booking to Firebase
-    const bookingData = {
-      salonId,
-      serviceId,
-      date: selectedDate,
-      time: selectedTime,
-      salon: salon.name,
-      service: salon.service
-    };
-    
-    console.log("Booking created:", bookingData);
-    navigate("/booking/confirmation", { state: bookingData });
+    try {
+      const saved = saveAppointment({
+        salonId,
+        serviceId,
+        dateISO: selectedDate.toISOString(),
+        time: selectedTime,
+        salonName: salon.name,
+        service: salon.service,
+      });
+
+      navigate("/booking/confirmation", { state: saved });
+    } catch (error) {
+      console.error("Failed to save appointment", error);
+      alert("Failed to save the appointment. Please try again.");
+    }
   };
 
   return (
@@ -55,34 +61,34 @@ const Booking = () => {
           onClick={() => navigate(-1)}
           className="mb-4 text-primary-foreground hover:bg-primary-foreground/20"
         >
-          ← Back
+          ← {t("back")}
         </Button>
-        <h1 className="text-2xl font-bold">Book Your Appointment</h1>
+        <h1 className="text-2xl font-bold">{t("book_your_appointment")}</h1>
       </div>
 
       <div className="max-w-2xl mx-auto p-6 space-y-6">
         {/* Booking Summary */}
         <Card>
           <CardHeader>
-            <CardTitle>Booking Summary</CardTitle>
+            <CardTitle>{t("booking_summary")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Salon:</span>
+                <span className="text-muted-foreground">{t("salon")}</span>
                 <span className="font-medium">{salon.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Service:</span>
+                <span className="text-muted-foreground">{t("service")}</span>
                 <span className="font-medium">{salon.service.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Duration:</span>
+                <span className="text-muted-foreground">{t("duration")}</span>
                 <span className="font-medium">{salon.service.duration}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Price:</span>
-                <Badge variant="secondary">${salon.service.price}</Badge>
+                <span className="text-muted-foreground">{t("price")}</span>
+                <Badge variant="secondary">{`$${salon.service.price}`}</Badge>
               </div>
             </div>
           </CardContent>
@@ -93,7 +99,7 @@ const Booking = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5" />
-              Select Date
+              {t("select_date")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -112,10 +118,10 @@ const Booking = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Select Time
+              {t("select_time")}
             </CardTitle>
             <CardDescription>
-              {selectedDate ? `Available times for ${selectedDate.toDateString()}` : "Please select a date first"}
+              {selectedDate ? t("available_times_for", { date: selectedDate.toDateString() }) : t("select_date_first")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -141,7 +147,7 @@ const Booking = () => {
           className="w-full h-12 text-lg"
           disabled={!selectedDate || !selectedTime}
         >
-          Confirm Booking - ${salon.service.price}
+          {t("confirm_booking")} - {`$${salon.service.price}`}
         </Button>
       </div>
     </div>
