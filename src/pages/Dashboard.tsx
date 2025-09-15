@@ -1,63 +1,47 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Badge } from "../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { CalendarDays, Clock, MapPin, Star, Trophy, Share2, Upload } from "lucide-react";
+import { getAppointments, deleteAppointment, Appointment } from "@/lib/appointments";
+import { useI18n } from "@/lib/i18n";
 
 const Dashboard = () => {
   const [userPoints] = useState(85);
+  const { t } = useI18n();
   
-  // Mock data
-  const upcomingBookings = [
-    {
-      id: "1",
-      salon: "Reda's Premium Barbershop",
-      service: "Classic Haircut",
-      date: "2024-01-15",
-      time: "2:30 PM",
-      price: 25,
-      status: "confirmed"
-    },
-    {
-      id: "2",
-      salon: "Glow Beauty Salon",
-      service: "Manicure",
-      date: "2024-01-18",
-      time: "11:00 AM",
-      price: 30,
-      status: "confirmed"
-    }
-  ];
-
-  const pastBookings = [
-    {
-      id: "3",
-      salon: "Style Cut Barbershop",
-      service: "Beard Trim",
-      date: "2024-01-10",
-      time: "4:00 PM",
-      price: 15,
-      status: "completed",
-      canReview: true
-    },
-    {
-      id: "4",
-      salon: "Reda's Premium Barbershop",
-      service: "Full Service",
-      date: "2024-01-05",
-      time: "1:00 PM",
-      price: 45,
-      status: "completed",
-      canReview: false,
-      hasPhoto: true
-    }
-  ];
+  const allAppointments = useMemo(() => getAppointments(), [])
+  const now = new Date()
+  const upcomingBookings = allAppointments
+    .filter((a) => new Date(a.dateISO) >= now)
+    .map((a) => ({
+      id: a.id,
+      salon: a.salonName,
+      service: a.service.name,
+      date: new Date(a.dateISO).toISOString().slice(0, 10),
+      time: a.time,
+      price: a.service.price,
+      status: "confirmed" as const,
+    }))
+  const pastBookings = allAppointments
+    .filter((a) => new Date(a.dateISO) < now)
+    .map((a) => ({
+      id: a.id,
+      salon: a.salonName,
+      service: a.service.name,
+      date: new Date(a.dateISO).toISOString().slice(0, 10),
+      time: a.time,
+      price: a.service.price,
+      status: "completed" as const,
+      canReview: true,
+      hasPhoto: false,
+    }))
 
   const handleCancelBooking = (bookingId: string) => {
-    // TODO: Implement cancel booking
-    console.log("Cancel booking:", bookingId);
+    deleteAppointment(bookingId)
+    window.location.reload()
   };
 
   const handleLeaveReview = (bookingId: string) => {
@@ -106,21 +90,21 @@ const Dashboard = () => {
       <div className="max-w-4xl mx-auto p-6">
         <Tabs defaultValue="bookings" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="bookings">My Bookings</TabsTrigger>
-            <TabsTrigger value="points">Points & Rewards</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="bookings">{t("my_bookings")}</TabsTrigger>
+            <TabsTrigger value="points">{t("points_rewards")}</TabsTrigger>
+            <TabsTrigger value="profile">{t("profile")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="bookings" className="space-y-6">
             {/* Upcoming Bookings */}
             <Card>
               <CardHeader>
-                <CardTitle>Upcoming Appointments</CardTitle>
-                <CardDescription>Your scheduled bookings</CardDescription>
+                <CardTitle>{t("upcoming_appointments")}</CardTitle>
+                <CardDescription>{t("scheduled_bookings")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {upcomingBookings.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No upcoming bookings</p>
+                  <p className="text-center text-muted-foreground py-8">{t("no_upcoming")}</p>
                 ) : (
                   upcomingBookings.map((booking) => (
                     <div key={booking.id} className="border rounded-lg p-4">
@@ -129,7 +113,7 @@ const Dashboard = () => {
                           <h3 className="font-medium">{booking.salon}</h3>
                           <p className="text-sm text-muted-foreground">{booking.service}</p>
                         </div>
-                        <Badge>${booking.price}</Badge>
+                        <Badge>{`$${booking.price}`}</Badge>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                         <div className="flex items-center gap-1">
@@ -160,8 +144,8 @@ const Dashboard = () => {
             {/* Past Bookings */}
             <Card>
               <CardHeader>
-                <CardTitle>Past Appointments</CardTitle>
-                <CardDescription>Your booking history</CardDescription>
+                <CardTitle>{t("past_appointments")}</CardTitle>
+                <CardDescription>{t("booking_history")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {pastBookings.map((booking) => (

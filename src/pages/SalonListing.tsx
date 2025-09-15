@@ -4,9 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Badge } from "../components/ui/badge";
 import { Star, MapPin, Clock, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useI18n } from "@/lib/i18n";
 
 const SalonListing = () => {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [selectedService, setSelectedService] = useState<string | null>(null);
 
   const salon = {
@@ -48,7 +50,7 @@ const SalonListing = () => {
           onClick={() => navigate(-1)}
           className="mb-4 text-primary-foreground hover:bg-primary-foreground/20"
         >
-          ← Back
+          ← {t("back")}
         </Button>
         <h1 className="text-3xl font-bold">{salon.name}</h1>
       </div>
@@ -93,8 +95,8 @@ const SalonListing = () => {
         {/* Services */}
         <Card>
           <CardHeader>
-            <CardTitle>Services & Pricing</CardTitle>
-            <CardDescription>Select a service to book</CardDescription>
+            <CardTitle>{t("service")}</CardTitle>
+            <CardDescription>{t("choose_service")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {salon.services.map((service) => (
@@ -125,7 +127,7 @@ const SalonListing = () => {
           className="w-full h-12 text-lg"
           disabled={!selectedService}
         >
-          Book Now
+          {t("book_now")}
         </Button>
 
         {/* Reviews */}
